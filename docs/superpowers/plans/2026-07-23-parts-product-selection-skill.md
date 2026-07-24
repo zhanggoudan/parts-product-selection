@@ -81,16 +81,16 @@ Confirm the result labels head versus middle/tail data, puts `mens birthday gift
 
 If an instruction is missing, update `SKILL.md`, rerun `quick_validate.py`, and repeat the invocation.
 
-### Task 3: Commit and synchronize the source copy
+### Task 3: Commit and synchronize the Skill repository
 
 **Files:**
-- Create: `skills/parts-product-selection/SKILL.md`
-- Create: `skills/parts-product-selection/agents/openai.yaml`
+- Create: `SKILL.md`
+- Create: `agents/openai.yaml`
 - Modify: `docs/superpowers/specs/2026-07-23-parts-product-selection-design.md`
 - Create: `docs/superpowers/plans/2026-07-23-parts-product-selection-skill.md`
 
 **Interfaces:**
-- Consumes: The validated installed package and a Git repository with a user-authorized `origin` remote.
+- Consumes: The validated installed package and a Git repository with a user-authorized `origin` remote. The repository root mirrors the installed Skill package.
 - Produces: A local commit and, when a remote exists, a pushed branch containing the Skill.
 
 - [ ] **Step 1: Copy the validated package into the repository**
@@ -98,8 +98,8 @@ If an instruction is missing, update `SKILL.md`, rerun `quick_validate.py`, and 
 Run:
 
 ```bash
-mkdir -p skills
-cp -R /Users/pingwei/.codex/skills/parts-product-selection skills/parts-product-selection
+cp /Users/pingwei/.codex/skills/parts-product-selection/SKILL.md SKILL.md
+cp -R /Users/pingwei/.codex/skills/parts-product-selection/agents agents
 ```
 
 Expected: the repository contains the same `SKILL.md` and `agents/openai.yaml` as the installed package.
@@ -110,7 +110,7 @@ Run:
 
 ```bash
 git init
-git add skills/parts-product-selection docs/superpowers/specs/2026-07-23-parts-product-selection-design.md docs/superpowers/plans/2026-07-23-parts-product-selection-skill.md
+git add SKILL.md agents docs/superpowers/specs/2026-07-23-parts-product-selection-design.md docs/superpowers/plans/2026-07-23-parts-product-selection-skill.md
 git commit -m "feat: add new-seller product selection skill"
 ```
 
