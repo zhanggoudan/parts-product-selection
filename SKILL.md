@@ -1,6 +1,6 @@
 ---
 name: parts-product-selection
-description: Evaluate Amazon product opportunities for a new seller using an ASIN, product image, or both. Use for SellerSprite research, reverse-order keywords, PPC/CPC viability, competitor and review analysis, and evidence-based product-selection scoring that distinguishes head-seller demand signals from middle/tail-seller entry feasibility.
+description: Use when evaluating an Amazon product opportunity for a new seller from an ASIN, product image, or both, especially for SellerSprite research, reverse-order keywords, PPC/CPC viability, competitor and review analysis, fit risk, and evidence-based product-selection scoring.
 ---
 
 # 新卖家配件选品
