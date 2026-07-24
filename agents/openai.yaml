@@ -1,4 +1,4 @@
 interface:
-  display_name: "配件选品（新卖家）"
-  short_description: "基于头部需求验证与中尾部数据评估新卖家进入机会和广告可行性"
+  display_name: "Amazon 配件选品（新卖家）"
+  short_description: "基于 ASIN 或产品图评估关键词、CPC、评论、适配与新卖家进入机会"
   default_prompt: "Use $parts-product-selection to evaluate this ASIN or product image for new-seller entry."
