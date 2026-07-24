@@ -1,4 +1,4 @@
 interface:
   display_name: "Amazon 配件选品（新卖家）"
-  short_description: "基于 ASIN 或产品图评估关键词、CPC、评论、适配与新卖家进入机会"
-  default_prompt: "Use $parts-product-selection to evaluate this ASIN or product image for new-seller entry."
+  short_description: "从ASIN、图片、OEM或产品系列评估Amazon新卖家进入机会"
+  default_prompt: "Use $parts-product-selection to evaluate this ASIN, image, OEM number, category URL, supplier series, or candidate list for new-seller entry."
