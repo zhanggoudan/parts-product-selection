@@ -5,6 +5,8 @@ from scripts.selection_math import (
     classify_cpc,
     cpc_score,
     maximum_cpc,
+    minimum_organic_share_for_break_even,
+    profit_timeline,
     required_conversion_rate,
     scenario_matrix,
     unit_economics,
@@ -103,6 +105,75 @@ class UnitEconomicsTests(unittest.TestCase):
                 cpc=Decimal("1"),
                 conversion_rate=Decimal("0"),
                 target_margin=Decimal("0.15"),
+            )
+
+
+class ProfitTimelineTests(unittest.TestCase):
+    def test_minimum_organic_share_uses_blended_advertising_cost(self):
+        self.assertEqual(
+            minimum_organic_share_for_break_even(
+                pre_ad_profit=Decimal("15.415"),
+                cpc=Decimal("1.14"),
+                conversion_rate=Decimal("0.05"),
+            ),
+            Decimal("1") - Decimal("15.415") / Decimal("22.8"),
+        )
+
+    def test_profit_timeline_finds_operating_and_cumulative_break_even_months(self):
+        result = profit_timeline(
+            pre_ad_profit=Decimal("15.415"),
+            cpc=Decimal("1.14"),
+            monthly_orders=(10, 20, 30, 40),
+            monthly_conversion_rates=(
+                Decimal("0.04"),
+                Decimal("0.05"),
+                Decimal("0.05"),
+                Decimal("0.05"),
+            ),
+            monthly_paid_order_shares=(
+                Decimal("0.90"),
+                Decimal("0.70"),
+                Decimal("0.50"),
+                Decimal("0.40"),
+            ),
+            initial_loss=Decimal("100"),
+            monthly_fixed_costs=(
+                Decimal("0"),
+                Decimal("0"),
+                Decimal("0"),
+                Decimal("0"),
+            ),
+        )
+
+        self.assertEqual(result["operating_break_even_month"], 3)
+        self.assertEqual(result["cumulative_break_even_month"], 4)
+        self.assertEqual(result["rows"][0]["monthly_profit"], Decimal("-102.350"))
+        self.assertEqual(result["rows"][3]["cumulative_profit"], Decimal("159.000"))
+
+    def test_profit_timeline_reports_no_break_even_with_negative_pre_ad_profit(self):
+        result = profit_timeline(
+            pre_ad_profit=Decimal("-1"),
+            cpc=Decimal("0.50"),
+            monthly_orders=(10, 20),
+            monthly_conversion_rates=(Decimal("0.05"), Decimal("0.05")),
+            monthly_paid_order_shares=(Decimal("0.50"), Decimal("0")),
+            initial_loss=Decimal("0"),
+            monthly_fixed_costs=(Decimal("0"), Decimal("0")),
+        )
+
+        self.assertIsNone(result["operating_break_even_month"])
+        self.assertIsNone(result["cumulative_break_even_month"])
+
+    def test_profit_timeline_rejects_mismatched_monthly_schedules(self):
+        with self.assertRaisesRegex(ValueError, "same number of months"):
+            profit_timeline(
+                pre_ad_profit=Decimal("10"),
+                cpc=Decimal("1"),
+                monthly_orders=(10, 20),
+                monthly_conversion_rates=(Decimal("0.05"),),
+                monthly_paid_order_shares=(Decimal("1"), Decimal("0.5")),
+                initial_loss=Decimal("0"),
+                monthly_fixed_costs=(Decimal("0"), Decimal("0")),
             )
 
 

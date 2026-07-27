@@ -26,6 +26,7 @@ class SkillStructureTests(unittest.TestCase):
             "references/scoring-rubric.md",
             "references/research-protocol.md",
             "scripts/calc_cpc.py",
+            "scripts/calc_profit_timeline.py",
             "scripts/calc_unit_economics.py",
             "scripts/sellersprite_client.py",
         )

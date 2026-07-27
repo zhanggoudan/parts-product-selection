@@ -170,3 +170,100 @@ def unit_economics(
         "target_profit": target_profit,
         "max_landed_cost": max_landed_cost,
     }
+
+
+def minimum_organic_share_for_break_even(
+    *,
+    pre_ad_profit: Decimal,
+    cpc: Decimal,
+    conversion_rate: Decimal,
+) -> Decimal | None:
+    """Return the minimum organic-order share needed for blended break-even."""
+    _nonnegative("cpc", cpc)
+    _rate("conversion_rate", conversion_rate, allow_zero=False)
+    if pre_ad_profit < ZERO:
+        return None
+    ad_cost_per_paid_order = cpc / conversion_rate
+    if ad_cost_per_paid_order == ZERO:
+        return ZERO
+    required_share = ONE - pre_ad_profit / ad_cost_per_paid_order
+    return min(ONE, max(ZERO, required_share))
+
+
+def profit_timeline(
+    *,
+    pre_ad_profit: Decimal,
+    cpc: Decimal,
+    monthly_orders: tuple[int, ...],
+    monthly_conversion_rates: tuple[Decimal, ...],
+    monthly_paid_order_shares: tuple[Decimal, ...],
+    initial_loss: Decimal,
+    monthly_fixed_costs: tuple[Decimal, ...],
+) -> dict[str, Any]:
+    """Project operating and cumulative break-even over an explicit monthly schedule."""
+    _nonnegative("cpc", cpc)
+    _nonnegative("initial_loss", initial_loss)
+    lengths = {
+        len(monthly_orders),
+        len(monthly_conversion_rates),
+        len(monthly_paid_order_shares),
+        len(monthly_fixed_costs),
+    }
+    if len(lengths) != 1:
+        raise ValueError("monthly schedules must contain the same number of months")
+    if not monthly_orders:
+        raise ValueError("monthly schedules must not be empty")
+
+    cumulative_profit = -initial_loss
+    operating_break_even_month: int | None = None
+    cumulative_break_even_month: int | None = None
+    rows: list[dict[str, Any]] = []
+
+    for index, (orders, conversion_rate, paid_share, fixed_cost) in enumerate(
+        zip(
+            monthly_orders,
+            monthly_conversion_rates,
+            monthly_paid_order_shares,
+            monthly_fixed_costs,
+            strict=True,
+        ),
+        start=1,
+    ):
+        if isinstance(orders, bool) or orders < 0:
+            raise ValueError("monthly_orders must contain nonnegative integers")
+        _rate("monthly_conversion_rate", conversion_rate, allow_zero=False)
+        _rate("monthly_paid_order_share", paid_share)
+        _nonnegative("monthly_fixed_cost", fixed_cost)
+
+        ad_cost_per_paid_order = cpc / conversion_rate
+        blended_ad_cost_per_order = paid_share * ad_cost_per_paid_order
+        unit_contribution = pre_ad_profit - blended_ad_cost_per_order
+        monthly_profit = unit_contribution * Decimal(orders) - fixed_cost
+        cumulative_profit += monthly_profit
+
+        if operating_break_even_month is None and monthly_profit > ZERO:
+            operating_break_even_month = index
+        if cumulative_break_even_month is None and cumulative_profit >= ZERO:
+            cumulative_break_even_month = index
+
+        rows.append(
+            {
+                "month": index,
+                "orders": orders,
+                "conversion_rate": conversion_rate,
+                "paid_order_share": paid_share,
+                "organic_order_share": ONE - paid_share,
+                "ad_cost_per_paid_order": ad_cost_per_paid_order,
+                "blended_ad_cost_per_order": blended_ad_cost_per_order,
+                "unit_contribution": unit_contribution,
+                "monthly_fixed_cost": fixed_cost,
+                "monthly_profit": monthly_profit,
+                "cumulative_profit": cumulative_profit,
+            }
+        )
+
+    return {
+        "operating_break_even_month": operating_break_even_month,
+        "cumulative_break_even_month": cumulative_break_even_month,
+        "rows": rows,
+    }

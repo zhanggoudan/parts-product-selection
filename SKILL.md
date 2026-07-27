@@ -1,6 +1,6 @@
 ---
 name: parts-product-selection
-description: Use when a new Amazon seller asks whether to launch, test, rank, or compare machinery parts or compatible replacement products from an ASIN, product image, OEM or part number, Amazon search/category URL, supplier series page, or a batch of candidates, including SellerSprite, reverse-ASIN/order keywords, CPC/PPC, reviews, fitment, and product-selection score requests.
+description: Use when a new Amazon seller asks whether to launch, test, rank, compare, or estimate break-even and payback time for machinery parts or compatible replacement products from an ASIN, product image, OEM or part number, Amazon search/category URL, supplier series page, or a batch of candidates, including SellerSprite, keywords, CPC/PPC, reviews, fitment, short-term loss, and profitability requests.
 ---
 
 # 新卖家配件选品
@@ -24,7 +24,7 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, or
 1. **确认身份**：核对 ASIN、父子变体、图片、标题、OEM、适用机型、尺寸、螺纹、接口、公母、密封和套装数量。
 2. **收集证据**：完整遵循 [research-protocol.md](references/research-protocol.md) 的数据源降级、样本、时间窗口、评论及风险规则。
 3. **区分样本**：头部独立父 ASIN 用于验证需求和关键词；至少 8 个有效中尾部 ASIN 用于判断新卖家进入。
-4. **计算经济性**：取得价格、费用、成本和广告假设后，运行 `scripts/calc_cpc.py` 与 `scripts/calc_unit_economics.py`。使用脚本原始精度判定，最后才四舍五入展示。
+4. **计算经济性**：取得价格、费用、成本和广告假设后，运行 `scripts/calc_cpc.py` 与 `scripts/calc_unit_economics.py`。用户问短期亏损、多久盈利或回本时，再运行 `scripts/calc_profit_timeline.py`。使用脚本原始精度判定，最后才四舍五入展示。
 5. **评分**：完整遵循 [scoring-rubric.md](references/scoring-rubric.md)。没有证据的维度记 `N/A`，不得臆造分数。
 6. **应用门槛**：先检查硬性否决条件，再依据总分决定主推、测试或暂不立项。
 
@@ -77,6 +77,16 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, or
 - 不把头部 ASIN 建议 CPC 直接作为新卖家起投价。
 - 用户未提供广告目标时，同时展示脚本的保守、基准、激进三种情景；以基准情景（30% ACoS、5%转化率）作为CPC维度正式分，另外两种只做敏感性分析。
 
+## 盈利时间和短期亏损
+
+- 把**单月经营转正**与**累计收回启动投入和历史亏损**分开。接受短期亏损只改变预算和测试窗口，不会自动产生盈利。
+- 使用逐月总订单、广告转化率、广告订单占比、固定费用和初始待回收亏损建立时间表。先算广告前单件利润，再用广告订单占比混合广告成本。
+- 输出达到单月转正所需的最低自然订单占比。广告前单件利润为负时，即使全部自然单也不能转正。
+- 缺少逐月路径时，优先使用用户或市场证据建立保守、基准、乐观三种明确标注的假设。缺少类目销量或任何爬坡依据时，只输出转正阈值，不给固定月份。
+- 只有最后两个月均为正且假设稳定时，才可用最后一个月的利润速度外推累计回本；否则写“预测期内未回本”。
+- 同时给出止损预算、复核节点和停止条件。不得把评论数量、时间经过或持续亏损本身当成自然排名必然改善的证据。
+- 盈利时间情景用于资金规划，不改变以基准 CPC 情景计算的正式利润评分。
+
 ## 硬性门槛
 
 以下任一项未通过时只能预评分，不得主推：
@@ -97,8 +107,9 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, or
 3. **双层评分表**：分数、满分、证据、头部/中尾部层级；缺证据写 `N/A`。
 4. **关键词与 CPC**：主投、测试、否词，以及三种CPC情景和最低所需转化率。
 5. **利润情景**：广告后贡献利润、贡献率、盈亏平衡ACoS和最高可接受到岸成本。
-6. **评论与适配风险**：主题频率、严重度、产品可修复、页面可修复和不可修复问题。
-7. **下一步**：建议价格带、最小测试量、必须确认的规格与最低成本验证动作。
+6. **盈利时间**：用户问短期亏损或多久盈利时，输出单月转正、累计回本、最低自然单占比、预测假设和止损条件。
+7. **评论与适配风险**：主题频率、严重度、产品可修复、页面可修复和不可修复问题。
+8. **下一步**：建议价格带、最小测试量、必须确认的规格与最低成本验证动作。
 
 批量任务先输出统一字段的候选排名，再对前 3–5 名输出完整结果。数据不足时列出所缺数据及受影响的评分维度。
 
