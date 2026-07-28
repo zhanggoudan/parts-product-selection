@@ -39,6 +39,26 @@ class SkillStructureTests(unittest.TestCase):
         self.assertIn("已登录的 SellerSprite 网页端", content)
         self.assertIn("不得把未覆盖维度按 0 分计入", content)
 
+    def test_v2_requires_market_keyword_and_test_gates(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        protocol = (ROOT / "references/research-protocol.md").read_text(
+            encoding="utf-8"
+        )
+        combined = skill + protocol
+
+        for required_text in (
+            "市场健康度预筛",
+            "商品集中度",
+            "新品销售占比",
+            "类目退货率",
+            "流量词、ABA出单词、广告词",
+            "7/14/30天",
+            "GIG",
+            "外观专利",
+        ):
+            with self.subTest(required_text=required_text):
+                self.assertIn(required_text, combined)
+
 
 if __name__ == "__main__":
     unittest.main()
