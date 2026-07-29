@@ -73,11 +73,12 @@ class SkillStructureTests(unittest.TestCase):
             "评论星级统计",
             "评论类型统计",
             "变体评论变化趋势",
-            "用户类型",
             "不得把父体总评论",
         ):
             with self.subTest(required_text=required_text):
                 self.assertIn(required_text, combined)
+
+        self.assertNotIn("用户类型", combined)
 
 
 if __name__ == "__main__":
