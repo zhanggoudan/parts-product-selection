@@ -56,6 +56,26 @@ class SkillStructureTests(unittest.TestCase):
             "GIG",
             "外观专利",
         ):
+                with self.subTest(required_text=required_text):
+                    self.assertIn(required_text, combined)
+
+    def test_sellersprite_analysis_report_is_a_structured_review_evidence_layer(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        protocol = (ROOT / "references/research-protocol.md").read_text(
+            encoding="utf-8"
+        )
+        combined = skill + protocol
+
+        for required_text in (
+            "卖家精灵分析报告",
+            "父体总评分",
+            "子体/变体",
+            "评论星级统计",
+            "评论类型统计",
+            "变体评论变化趋势",
+            "用户类型",
+            "不得把父体总评论",
+        ):
             with self.subTest(required_text=required_text):
                 self.assertIn(required_text, combined)
 
