@@ -1,4 +1,4 @@
 interface:
-  display_name: "Amazon 配件选品（新卖家）"
-  short_description: "评估Amazon机械配件新品、广告、利润及回本时间"
-  default_prompt: "Use $parts-product-selection to evaluate this Amazon parts opportunity, including new-seller entry, advertising, profit, and break-even timing."
+  display_name: "Amazon 机械产品选品（新卖家）"
+  short_description: "评估机械整机、配件、附件的新品机会、风险与利润"
+  default_prompt: "Use $parts-product-selection to evaluate this Amazon machinery product for new-seller entry, performance, compliance, fulfillment, advertising, profit, and break-even timing."

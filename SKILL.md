@@ -1,35 +1,51 @@
 ---
 name: parts-product-selection
-description: Use when a new Amazon seller asks whether to launch, test, rank, compare, or estimate break-even and payback time for machinery parts or compatible replacement products from an ASIN, product image, OEM or part number, Amazon search/category URL, supplier series page, or a batch of candidates, including SellerSprite, keywords, CPC/PPC, reviews, fitment, short-term loss, and profitability requests.
+description: Use when a new Amazon seller asks whether to launch, test, rank, compare, source, or estimate break-even for machinery products, replacement parts, mechanical assemblies, attachments, gasoline/diesel/electric/hydraulic/pneumatic machines, complete equipment, or compatible products from an ASIN, image, model/OEM number, Amazon category/search URL, supplier page, or candidate batch.
 ---
 
-# 新卖家配件选品
+# 新卖家机械产品选品
 
 ## 核心原则
 
 判断新卖家能否进入，不用头部卖家的成功代替进入证据。始终分开标注**头部市场验证**和**中尾部进入机会**。把估算、事实和缺失数据分开。
 
-卖家精灵的推荐模式、类目榜单和单个爆款只用于发现候选品，不是立项结论。先做市场健康度预筛，再做产品、关键词、利润和适配验证；任何一层不通过都不能用下一层数据补救。
+卖家精灵的推荐模式、类目榜单和单个爆款只用于发现候选品，不是立项结论。先做产品类型路由和市场健康度预筛，再做产品、关键词、利润、性能和适配验证；任何一层不通过都不能用下一层数据补救。
 
 ## 输入等级
 
 - ASIN：研究目标商品及所在细分市场。
-- 图片或 OEM/零件号：识别候选品和待核规格，只给预评分。
+- 图片、型号或 OEM/零件号：识别候选品和待核规格，只给预评分。
 - ASIN 加图片/规格：用商品数据核对身份和适配。
 - 搜索、类目、供应商系列页面或批量候选：先统一初筛，再对排名靠前者深挖。
 - 未指定站点时使用 Amazon US，并写明假设。
 
 只有图片、身份未核实或关键数据不足时，不得给“主推”结论。无数据不等于无需求。
 
+## 产品类型路由
+
+每次先读取 [mechanical-product-routing.md](references/mechanical-product-routing.md)，记录产品族、动力源、履约方式和风险等级。混合产品同时应用所有相关路线，以风险最高路线为硬门槛。
+
+- 替换件与耗材；
+- 机械总成；
+- 机械附件与属具；
+- 液压与气动产品；
+- 汽油与柴油动力整机；
+- 电动与电池机械；
+- 手动与无动力机械；
+- 安全、承载与关键失效产品。
+
+宽类目研究必须先按产品族、动力源、关键性能档和履约方式拆成可比细分市场。不得把整机、配件、附件、耗材或不同动力路线放入同一销量、价格、评论或评分样本。
+
 ## 执行流程
 
-1. **市场健康度预筛**：按 [research-protocol.md](references/research-protocol.md) 核对市场容量、商品/品牌/卖家集中度、新品销售占比、类目退货率、卖家类型和12个月季节性；只决定是否深挖，不单独替代评分。
-2. **确认身份**：核对 ASIN、父子变体、图片、标题、OEM、适用机型、尺寸、螺纹、接口、公母、密封和套装数量。
-3. **收集证据**：完整遵循 [research-protocol.md](references/research-protocol.md) 的数据源降级、样本、时间窗口、评论及风险规则。
-4. **区分样本**：头部独立父 ASIN 用于验证需求和关键词；至少 8 个有效中尾部 ASIN 用于判断新卖家进入。
-5. **计算经济性**：取得价格、费用、成本和广告假设后，运行 `scripts/calc_cpc.py` 与 `scripts/calc_unit_economics.py`。用户问短期亏损、多久盈利或回本时，再运行 `scripts/calc_profit_timeline.py`。使用脚本原始精度判定，最后才四舍五入展示。
-6. **评分**：完整遵循 [scoring-rubric.md](references/scoring-rubric.md)。没有证据的维度记 `N/A`，不得臆造分数。
-7. **应用门槛**：先检查硬性否决条件，再依据总分决定主推、测试或暂不立项。
+1. **分类与风险路由**：按产品族、动力源、履约方式和最高风险路线建立必查字段。
+2. **市场健康度预筛**：按 [research-protocol.md](references/research-protocol.md) 核对市场容量、集中度、新品销售占比、退货、卖家类型和12个月季节性；只决定是否深挖。
+3. **确认身份与性能**：核对 ASIN、父子变体、图片、型号/OEM、适用对象、规格、接口、额定性能、套装数量和供应商样品。
+4. **收集并区分证据**：完整遵循研究协议；头部独立父 ASIN 只验证需求，至少 8 个有效中尾部父 ASIN 判断新卖家进入。
+5. **核验服务、合规与履约**：按产品路线核对认证、测试、说明书、保修、备件、危险品、包装及 FBA/FBM/3PL/LTL 可行性。
+6. **计算经济性**：取得价格、费用、成本和广告假设后，运行 `scripts/calc_cpc.py` 与 `scripts/calc_unit_economics.py`；将保修准备金、维修/补发和反向物流计入其他成本或退货损失。问盈利时间时再运行 `scripts/calc_profit_timeline.py`。
+7. **评分**：完整遵循 [scoring-rubric.md](references/scoring-rubric.md)。没有证据的维度记 `N/A`，不得臆造分数。
+8. **应用门槛**：先检查最高风险路线的硬性否决条件，再依据总分决定主推、测试或暂不立项。
 
 ## SellerSprite 路由
 
@@ -49,7 +65,7 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, co
 对每个重点 ASIN，在“查看卖家精灵分析报告”中记录：父体总评分/总评论、目标子体/变体的评论归属、价格、销量、卖家数、上架时间和时间范围。依次查看**评论星级统计、评论类型统计、评论型号统计、变体评论变化趋势、评论原文**。
 
 - 父体总评分和父体总评论只能说明该父体的历史口碑；不得把父体总评论、总评分或其他变体的评论直接计入目标子体/变体。
-- 当报告的变体表、趋势图和父体汇总相互矛盾，标记“变体归属未确认”，评论质量与适配/退货维度记 `N/A`，不得取平均或补猜。
+- 当报告的变体表、趋势图和父体汇总相互矛盾，标记“变体归属未确认”，评论质量与适配、性能及退货维度记 `N/A`，不得取平均或补猜。
 - 从近期原文标注使用场景、购买理由、失效部位、安装/适配问题、包装物流和复购意图；再归入产品、页面/适配表、包装/物流、不可接受四类动作。
 - 报告中的“特点评分”或图表为空时，只表示该字段缺失，不表示没有问题。评论报告不能替代销量、出单词、CPC、成本或合规证据。
 
@@ -70,7 +86,7 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, co
 | 新卖家 CPC／广告可行性 | 15 |
 | 竞争与评论门槛 | 10 |
 | 利润空间 | 15 |
-| 适配／退货风险 | 10 |
+| 适配、性能与退货风险 | 10 |
 | 差异化空间 | 5 |
 | 评论质量 | 5 |
 
@@ -116,10 +132,11 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, co
 以下任一项未通过时只能预评分，不得主推：
 
 - 产品身份、图片和目标 ASIN 不一致或未确认；
-- OEM、型号、关键尺寸、接口或密封结构未确认；
+- 对应产品路线要求的型号/OEM、关键尺寸、接口、材料、额定性能或样品未确认；
 - 采购、头程、Amazon费用、退货和广告后的利润不可计算；
 - 品牌兼容描述、OEM/原厂声明、知识产权或类目合规风险未核实；
-- 危险品、认证、超大件、易损包装或关键物流费用未核实；
+- 动力、排放、电气、电池、压力、承载或安全相关认证与测试未核实；
+- FBA、FBM、3PL或LTL路线、危险品、超大件、易损包装、保修服务或关键物流费用未核实；
 - 高误购/高退货问题无法通过产品、适配表和页面共同控制。
 
 ## 输出合同
@@ -127,13 +144,13 @@ description: Use when a new Amazon seller asks whether to launch, test, rank, co
 按以下顺序输出：
 
 1. **结论摘要**：主推/小批测试/暂不立项/数据受限，附总分、进入层分和覆盖率。
-2. **产品与证据可信度**：站点、身份、日期、时间窗口、数据源等级和权限限制。
+2. **产品与证据可信度**：站点、产品族、动力源、履约路线、风险等级、身份、日期、时间窗口、数据源等级和权限限制。
 3. **双层评分表**：分数、满分、证据、头部/中尾部层级；缺证据写 `N/A`。
 4. **关键词与 CPC**：主投、测试、否词，以及三种CPC情景和最低所需转化率。
 5. **利润情景**：广告后贡献利润、贡献率、盈亏平衡ACoS和最高可接受到岸成本。
 6. **盈利时间**：用户问短期亏损或多久盈利时，输出单月转正、累计回本、最低自然单占比、预测假设和止损条件。
-7. **评论与适配风险**：报告时间范围、父体与目标子体/变体的评论归属、主题频率、严重度、产品可修复、页面可修复和不可修复问题。
-8. **市场健康度与合规**：集中度、新品销售占比、类目退货率、12个月季节性，以及外观专利/商标/兼容措辞的核验状态。
+7. **评论、性能与适配风险**：报告时间范围、评论归属、主题频率、严重度、性能/耐久证据、产品可修复、页面可修复和不可修复问题。
+8. **市场健康度、服务与合规**：集中度、新品销售占比、退货率、12个月季节性、保修/备件、产品路线认证，以及专利/商标/兼容措辞状态。
 9. **下一步**：建议价格带、最小测试量、必须确认的规格与最低成本验证动作；如测试，附7/14/30天测试卡。
 
 批量任务先输出统一字段的候选排名，再对前 3–5 名输出完整结果。数据不足时列出所缺数据及受影响的评分维度。

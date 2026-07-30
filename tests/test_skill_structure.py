@@ -23,6 +23,7 @@ class SkillStructureTests(unittest.TestCase):
     def test_required_resources_exist(self):
         required = (
             "agents/openai.yaml",
+            "references/mechanical-product-routing.md",
             "references/scoring-rubric.md",
             "references/research-protocol.md",
             "scripts/calc_cpc.py",
@@ -79,6 +80,65 @@ class SkillStructureTests(unittest.TestCase):
                 self.assertIn(required_text, combined)
 
         self.assertNotIn("用户类型", combined)
+
+    def test_routes_parts_assemblies_attachments_and_complete_machines(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        protocol = (ROOT / "references/research-protocol.md").read_text(
+            encoding="utf-8"
+        )
+        routing_path = ROOT / "references/mechanical-product-routing.md"
+        routing = (
+            routing_path.read_text(encoding="utf-8")
+            if routing_path.exists()
+            else ""
+        )
+        combined = skill + protocol + routing
+
+        for required_text in (
+            "产品类型路由",
+            "替换件与耗材",
+            "机械总成",
+            "机械附件与属具",
+            "液压与气动产品",
+            "汽油与柴油动力整机",
+            "电动与电池机械",
+            "手动与无动力机械",
+            "安全、承载与关键失效产品",
+        ):
+            with self.subTest(required_text=required_text):
+                self.assertIn(required_text, combined)
+
+    def test_complete_machine_route_requires_compliance_service_and_fulfillment(self):
+        routing_path = ROOT / "references/mechanical-product-routing.md"
+        routing = (
+            routing_path.read_text(encoding="utf-8")
+            if routing_path.exists()
+            else ""
+        )
+
+        for required_text in (
+            "EPA",
+            "CARB",
+            "UL/ETL",
+            "UN 38.3",
+            "保修准备金",
+            "备件",
+            "反向物流",
+            "FBA、FBM、3PL或LTL",
+        ):
+            with self.subTest(required_text=required_text):
+                self.assertIn(required_text, routing)
+
+    def test_scoring_and_ui_metadata_cover_mechanical_products(self):
+        rubric = (ROOT / "references/scoring-rubric.md").read_text(
+            encoding="utf-8"
+        )
+        metadata = _frontmatter(ROOT / "SKILL.md")
+        ui = (ROOT / "agents/openai.yaml").read_text(encoding="utf-8")
+
+        self.assertIn("适配、性能与退货风险", rubric)
+        self.assertIn("complete equipment", metadata["description"])
+        self.assertIn("Amazon 机械产品选品", ui)
 
 
 if __name__ == "__main__":
