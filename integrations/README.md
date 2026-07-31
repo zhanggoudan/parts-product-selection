@@ -1,7 +1,9 @@
-# Southeast Rippa MCP configuration templates
+# Southeast Rippa MCP configuration and installer
 
-This directory contains portable, non-secret configuration templates for the
-Southeast Rippa integrations. It is safe to commit these templates to Git.
+This directory contains portable, non-secret configuration templates, bundled
+MCP server files, and a macOS installer for the Southeast Rippa integrations.
+The bundle is safe to commit to Git because secrets stay in each user's macOS
+Keychain.
 
 ## Included integrations
 
@@ -15,6 +17,31 @@ Southeast Rippa integrations. It is safe to commit these templates to Git.
 - **Google Ads** currently has API application/design metadata only. A local
   Google Ads MCP is not yet registered; Basic Access is pending and an OAuth
   refresh token has not been generated.
+
+## Install on another Mac
+
+From a cloned repository, run:
+
+```sh
+./integrations/installer/install.sh --apply-config
+./integrations/installer/configure-keychain.sh
+./integrations/installer/doctor.sh
+```
+
+The installer backs up an existing `~/.codex/config.toml` before adding its
+Meta and WordPress MCP entries. It copies the bundled servers to
+`~/.codex/parts-product-selection-integrations/` and generates machine-specific
+absolute paths there. Restart Codex after installation so it reloads MCP
+configuration.
+
+To build a distributable zip from this repository, run:
+
+```sh
+./integrations/installer/build-macos-package.sh
+```
+
+The result is written to `dist/`. The zip is an unsigned portable installer
+bundle, not a signed Apple `.pkg`; Gatekeeper may require opening it manually.
 
 ## New-computer setup
 

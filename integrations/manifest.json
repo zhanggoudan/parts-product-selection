@@ -1,0 +1,26 @@
+{
+  "name": "southeast-rippa-mcp-bundle",
+  "version": "0.1.0",
+  "platform": "macos",
+  "secretStorage": "macOS Keychain",
+  "components": {
+    "metaAds": {
+      "included": true,
+      "entrypoint": "servers/meta-ads-mcp/scripts/meta-ads-mcp.mjs",
+      "keychainService": "codex.meta.ads",
+      "keychainAccount": "access-token"
+    },
+    "wordpress": {
+      "included": true,
+      "entrypoint": "servers/wordpress/server.mjs",
+      "keychainService": "codex.southeastrippa.wordpress",
+      "keychainAccount": "codex_mcp"
+    },
+    "googleAds": {
+      "included": false,
+      "reason": "Basic Access and OAuth refresh-token setup are still pending"
+    }
+  },
+  "installer": "installer/install.sh",
+  "healthCheck": "installer/doctor.sh"
+}

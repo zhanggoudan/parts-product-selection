@@ -1,0 +1,26 @@
+{
+  "name": "meta-ads-mcp",
+  "version": "0.2.0+codex.20260731",
+  "description": "Official Meta Ads MCP access plus focused Southeast Rippa Ads and Instagram tools.",
+  "author": {
+    "name": "Southeast Rippa"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Meta Ads MCP",
+    "shortDescription": "Access Meta Ads and Southeast Rippa Instagram through MCP.",
+    "longDescription": "Connects Codex to Meta's official Ads MCP server and focused local Instagram tools for insights, media and Direct conversations. Advertising or Instagram message writes require an explicit user request. The access token remains in macOS Keychain.",
+    "developerName": "Southeast Rippa",
+    "category": "Marketing",
+    "capabilities": [
+      "Official Meta Ads MCP tools",
+      "Campaign, ad set and ad analysis",
+      "Catalog and activity-log access",
+      "Instagram profile, insights and media",
+      "Instagram Direct conversation access",
+      "Explicitly requested ad and Instagram message operations"
+    ],
+    "defaultPrompt": "Analyze active Meta ads through the official MCP server and access @southeastrippa through the local Instagram MCP tools. Only make ad changes or send Instagram messages when I explicitly request the exact action."
+  },
+  "mcpServers": "./.mcp.json"
+}
