@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "meta-ads-official": {
+      "command": "node",
+      "args": [
+        "/PATH/TO/meta-ads-mcp/scripts/meta-ads-official-bridge.mjs"
+      ],
+      "env": {
+        "META_ADS_MCP_URL": "https://mcp.facebook.com/ads",
+        "META_KEYCHAIN_SERVICE": "codex.meta.ads",
+        "META_KEYCHAIN_ACCOUNT": "access-token"
+      }
+    },
+    "meta-ads": {
+      "command": "node",
+      "args": [
+        "/PATH/TO/meta-ads-mcp/scripts/meta-ads-mcp.mjs"
+      ],
+      "env": {
+        "META_AD_ACCOUNT_ID": "act_900524242288960",
+        "META_INSTAGRAM_ACCOUNT_ID": "17841471481136852",
+        "META_PAGE_ID": "495341997002120",
+        "META_GRAPH_API_VERSION": "v25.0",
+        "META_KEYCHAIN_SERVICE": "codex.meta.ads",
+        "META_KEYCHAIN_ACCOUNT": "access-token"
+      }
+    }
+  }
+}

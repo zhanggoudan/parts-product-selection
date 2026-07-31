@@ -1,0 +1,11 @@
+# Add this block to the new computer's ~/.codex/config.toml.
+# Replace /PATH/TO/... with the actual paths on that computer.
+
+[mcp_servers.southeastrippa_wordpress]
+command = "/PATH/TO/node"
+args = ["/PATH/TO/.codex/mcp-servers/southeastrippa-wordpress/server.mjs"]
+startup_timeout_sec = 30
+
+# The server reads the Application Password from macOS Keychain:
+# service = codex.southeastrippa.wordpress
+# account = codex_mcp
