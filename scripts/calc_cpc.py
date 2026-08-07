@@ -23,10 +23,17 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--price", required=True, type=Decimal)
     parser.add_argument("--bid", required=True, type=Decimal)
+    parser.add_argument("--pre-ad-profit", required=True, type=Decimal)
+    parser.add_argument("--target-profit", default=Decimal("0"), type=Decimal)
     parser.add_argument("--advertising-competitors", type=int)
     args = parser.parse_args()
 
-    rows = scenario_matrix(price=args.price, bid=args.bid)
+    rows = scenario_matrix(
+        price=args.price,
+        bid=args.bid,
+        pre_ad_profit=args.pre_ad_profit,
+        target_profit=args.target_profit,
+    )
     for row in rows:
         row["score_15"] = cpc_score(
             bid=args.bid,

@@ -28,23 +28,51 @@ def _rate(name: str, value: Decimal, *, allow_zero: bool = True) -> None:
         raise ValueError(f"{name} must be {qualifier}")
 
 
-def maximum_cpc(*, price: Decimal, target_acos: Decimal, conversion_rate: Decimal) -> Decimal:
+def maximum_cpc(
+    *,
+    price: Decimal,
+    target_acos: Decimal,
+    conversion_rate: Decimal,
+    pre_ad_profit: Decimal | None = None,
+    target_profit: Decimal = ZERO,
+) -> Decimal:
     _positive("price", price)
     _rate("target_acos", target_acos, allow_zero=False)
     _rate("conversion_rate", conversion_rate, allow_zero=False)
-    return price * target_acos * conversion_rate
+    _nonnegative("target_profit", target_profit)
+
+    allowance = price * target_acos
+    if pre_ad_profit is not None:
+        allowance = min(allowance, pre_ad_profit - target_profit)
+    return max(ZERO, allowance) * conversion_rate
 
 
-def required_conversion_rate(*, bid: Decimal, price: Decimal, target_acos: Decimal) -> Decimal:
+def required_conversion_rate(
+    *,
+    bid: Decimal,
+    price: Decimal,
+    target_acos: Decimal,
+    pre_ad_profit: Decimal | None = None,
+    target_profit: Decimal = ZERO,
+) -> Decimal | None:
     _nonnegative("bid", bid)
     _positive("price", price)
     _rate("target_acos", target_acos, allow_zero=False)
-    return bid / (price * target_acos)
+    _nonnegative("target_profit", target_profit)
+
+    allowance = price * target_acos
+    if pre_ad_profit is not None:
+        allowance = min(allowance, pre_ad_profit - target_profit)
+    if allowance <= ZERO:
+        return None
+    return bid / allowance
 
 
 def classify_cpc(*, bid: Decimal, max_cpc: Decimal) -> str:
     _nonnegative("bid", bid)
-    _positive("max_cpc", max_cpc)
+    _nonnegative("max_cpc", max_cpc)
+    if max_cpc == ZERO:
+        return "unviable"
     ratio = bid / max_cpc
     if ratio <= Decimal("0.75"):
         return "high-feasibility"
@@ -84,7 +112,13 @@ def cpc_score(
     return max(0, base - penalty)
 
 
-def scenario_matrix(*, price: Decimal, bid: Decimal) -> list[dict[str, Any]]:
+def scenario_matrix(
+    *,
+    price: Decimal,
+    bid: Decimal,
+    pre_ad_profit: Decimal | None = None,
+    target_profit: Decimal = ZERO,
+) -> list[dict[str, Any]]:
     scenarios = (
         ("conservative", Decimal("0.20"), Decimal("0.03")),
         ("base", Decimal("0.30"), Decimal("0.05")),
@@ -96,6 +130,8 @@ def scenario_matrix(*, price: Decimal, bid: Decimal) -> list[dict[str, Any]]:
             price=price,
             target_acos=target_acos,
             conversion_rate=conversion_rate,
+            pre_ad_profit=pre_ad_profit,
+            target_profit=target_profit,
         )
         rows.append(
             {
@@ -108,6 +144,8 @@ def scenario_matrix(*, price: Decimal, bid: Decimal) -> list[dict[str, Any]]:
                     bid=bid,
                     price=price,
                     target_acos=target_acos,
+                    pre_ad_profit=pre_ad_profit,
+                    target_profit=target_profit,
                 ),
                 "classification": classify_cpc(bid=bid, max_cpc=max_cpc),
             }
@@ -119,33 +157,55 @@ def unit_economics(
     *,
     price: Decimal,
     landed_cost: Decimal,
-    referral_fee_rate: Decimal,
-    fba_fee: Decimal,
+    referral_fee_rate: Decimal | None = None,
     other_cost: Decimal,
     return_rate: Decimal,
     loss_per_return: Decimal,
     cpc: Decimal,
     conversion_rate: Decimal,
     target_margin: Decimal,
+    fulfillment_cost: Decimal | None = None,
+    fba_fee: Decimal | None = None,
+    referral_fee: Decimal | None = None,
 ) -> dict[str, Decimal]:
     _positive("price", price)
+    if referral_fee_rate is not None and referral_fee is not None:
+        raise ValueError("provide either referral_fee_rate or referral_fee, not both")
+    if referral_fee_rate is None:
+        if referral_fee is None:
+            raise ValueError("referral_fee_rate or referral_fee must be provided")
+        _nonnegative("referral_fee", referral_fee)
+    else:
+        _rate("referral_fee_rate", referral_fee_rate)
+        referral_fee = price * referral_fee_rate
+    if fulfillment_cost is not None and fba_fee is not None:
+        raise ValueError("provide either fulfillment_cost or fba_fee, not both")
+    if fulfillment_cost is None:
+        if fba_fee is None:
+            raise ValueError("fulfillment_cost must be provided")
+        fulfillment_cost = fba_fee
     for name, value in (
         ("landed_cost", landed_cost),
-        ("fba_fee", fba_fee),
+        ("fulfillment_cost", fulfillment_cost),
         ("other_cost", other_cost),
         ("loss_per_return", loss_per_return),
         ("cpc", cpc),
     ):
         _nonnegative(name, value)
-    _rate("referral_fee_rate", referral_fee_rate)
     _rate("return_rate", return_rate)
     _rate("conversion_rate", conversion_rate, allow_zero=False)
     _rate("target_margin", target_margin)
 
-    referral_fee = price * referral_fee_rate
     return_reserve = return_rate * loss_per_return
     ad_cost_per_order = cpc / conversion_rate
-    pre_ad_profit = price - referral_fee - fba_fee - landed_cost - other_cost - return_reserve
+    pre_ad_profit = (
+        price
+        - referral_fee
+        - fulfillment_cost
+        - landed_cost
+        - other_cost
+        - return_reserve
+    )
     contribution_profit = pre_ad_profit - ad_cost_per_order
     contribution_margin = contribution_profit / price
     break_even_acos = pre_ad_profit / price
@@ -153,7 +213,7 @@ def unit_economics(
     max_landed_cost = (
         price
         - referral_fee
-        - fba_fee
+        - fulfillment_cost
         - other_cost
         - return_reserve
         - ad_cost_per_order

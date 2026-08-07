@@ -14,6 +14,18 @@ from scripts.selection_math import (
 
 
 class CPCMathTests(unittest.TestCase):
+    def test_cpc_cap_uses_lower_profit_allowance_than_target_acos(self):
+        self.assertEqual(
+            maximum_cpc(
+                price=Decimal("1750"),
+                target_acos=Decimal("0.30"),
+                conversion_rate=Decimal("0.05"),
+                pre_ad_profit=Decimal("17.50"),
+                target_profit=Decimal("0"),
+            ),
+            Decimal("0.875"),
+        )
+
     def test_maximum_cpc_keeps_exact_decimal_precision(self):
         self.assertEqual(
             maximum_cpc(
@@ -43,6 +55,15 @@ class CPCMathTests(unittest.TestCase):
             "low-budget-only",
         )
 
+    def test_zero_profit_allowance_makes_cpc_unviable(self):
+        self.assertEqual(
+            classify_cpc(
+                bid=Decimal("1"),
+                max_cpc=Decimal("0"),
+            ),
+            "unviable",
+        )
+
     def test_cpc_score_includes_advertiser_pressure(self):
         self.assertEqual(
             cpc_score(
@@ -63,12 +84,56 @@ class CPCMathTests(unittest.TestCase):
         self.assertEqual(rows[2]["target_acos"], Decimal("0.40"))
         self.assertEqual(rows[2]["conversion_rate"], Decimal("0.08"))
 
+    def test_scenario_matrix_uses_profit_allowance_for_cpc_and_conversion(self):
+        rows = scenario_matrix(
+            price=Decimal("1750"),
+            bid=Decimal("1.78"),
+            pre_ad_profit=Decimal("17.50"),
+            target_profit=Decimal("0"),
+        )
+
+        self.assertEqual(rows[1]["max_cpc"], Decimal("0.875"))
+        self.assertEqual(rows[1]["required_conversion_rate"], Decimal("1.78") / Decimal("17.50"))
+
     def test_base_scenario_is_the_only_formal_score_when_targets_are_missing(self):
         rows = scenario_matrix(price=Decimal("50"), bid=Decimal("1"))
         self.assertEqual([row["formal_score"] for row in rows], [False, True, False])
 
 
 class UnitEconomicsTests(unittest.TestCase):
+    def test_unit_economics_uses_route_neutral_fulfillment_cost(self):
+        result = unit_economics(
+            price=Decimal("100"),
+            landed_cost=Decimal("40"),
+            referral_fee_rate=Decimal("0.15"),
+            fulfillment_cost=Decimal("20"),
+            other_cost=Decimal("0"),
+            return_rate=Decimal("0"),
+            loss_per_return=Decimal("0"),
+            cpc=Decimal("1"),
+            conversion_rate=Decimal("0.10"),
+            target_margin=Decimal("0"),
+        )
+
+        self.assertEqual(result["pre_ad_profit"], Decimal("25"))
+
+    def test_unit_economics_accepts_explicit_referral_fee(self):
+        result = unit_economics(
+            price=Decimal("1000"),
+            landed_cost=Decimal("400"),
+            referral_fee=Decimal("94"),
+            fulfillment_cost=Decimal("200"),
+            other_cost=Decimal("0"),
+            return_rate=Decimal("0"),
+            loss_per_return=Decimal("0"),
+            cpc=Decimal("1"),
+            conversion_rate=Decimal("0.10"),
+            target_margin=Decimal("0"),
+        )
+
+        self.assertEqual(result["referral_fee"], Decimal("94"))
+        self.assertEqual(result["pre_ad_profit"], Decimal("306"))
+
     def test_unit_economics_includes_returns_and_advertising(self):
         result = unit_economics(
             price=Decimal("50"),

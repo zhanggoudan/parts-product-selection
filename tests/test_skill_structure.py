@@ -40,6 +40,28 @@ class SkillStructureTests(unittest.TestCase):
         self.assertIn("已登录的 SellerSprite 网页端", content)
         self.assertIn("不得把未覆盖维度按 0 分计入", content)
 
+    def test_heavy_fulfillment_and_cost_aware_cpc_gates_are_explicit(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        protocol = (ROOT / "references/research-protocol.md").read_text(
+            encoding="utf-8"
+        )
+        routing = (ROOT / "references/mechanical-product-routing.md").read_text(
+            encoding="utf-8"
+        )
+        rubric = (ROOT / "references/scoring-rubric.md").read_text(
+            encoding="utf-8"
+        )
+        combined = skill + protocol + routing + rubric
+
+        for required_text in (
+            "FBA估算费",
+            "实际履约报价",
+            "成本约束的可承受CPC",
+            "不得输出固定月份",
+        ):
+            with self.subTest(required_text=required_text):
+                self.assertIn(required_text, combined)
+
     def test_v2_requires_market_keyword_and_test_gates(self):
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         protocol = (ROOT / "references/research-protocol.md").read_text(
